@@ -2,6 +2,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Lesson1 {
+
+    static final float APPLE_WEIGHT = 1.0f;
+    static final float ORANGE_WEIGHT = 1.5f;
+
+
     public static void main(String[] args) {
 
         Integer[] arr1 = {10, 20, 30, 40};
@@ -11,6 +16,17 @@ public class Lesson1 {
         exchangeElements(arr2, 2, 3);
         System.out.println(Arrays.toString(arr1));
         System.out.println(Arrays.toString(arr2));
+
+        ArrayList<Integer> aL1 = toArrayList(arr1);
+        aL1.add(100);
+        ArrayList<String> aL2 = toArrayList(arr2);
+        aL2.add("sss");
+        System.out.println(aL2);
+        System.out.println(aL1);
+
+        Box<Apple> ba = new Box<>();
+        ba.add(new Apple());
+        ba.add(new Apple());
 
     }
 
@@ -25,12 +41,11 @@ public class Lesson1 {
         return true;
     }
 
-    public static <E> boolean toArrayList(E[] arr, ArrayList<E> arrayList) {
-        ArrayList<E> tmp = new ArrayList<E>();
-        arrayList.clear();
+    public static <E> ArrayList<E> toArrayList(E[] arr) {
+        ArrayList<E> tmpArrayList = new ArrayList<>();
         for (E elem : arr) {
-            arrayList.add(elem);
+            tmpArrayList.add(elem);
         }
-        return true;
+        return tmpArrayList;
     }
 }
