@@ -1,23 +1,31 @@
 import java.util.ArrayList;
 
 public class  Box<E extends Fruit> {
-    private float weight;
-    private ArrayList<E> box;
+    private ArrayList<E> content;
 
     public Box() {
-        this.weight = 0;
-        this.box = new ArrayList<>();
+        this.content = new ArrayList<>();
     }
 
     public float getWeight() {
+        float weight = 0f;
+        for (E fruit: content) {
+            weight += fruit.getWeight();
+        }
         return weight;
     }
 
     public boolean add(E fruit) {
-        return box.add(fruit);
+        return content.add(fruit);
     }
 
-    public boolean compare(Box<?> o) {
-        return true;
+    public boolean compare(Box<?> box) {
+        return Math.abs(getWeight() - box.getWeight()) < Lesson1.WEIGHT_DELTA;
+    }
+
+    public void reloadTo(Box<E> box) {
+        while (!this.content.isEmpty()) {
+            box.add(this.content.remove(0));
+        }
     }
 }
