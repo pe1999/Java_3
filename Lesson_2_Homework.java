@@ -9,7 +9,7 @@ package ru.geekbrains;
 public interface AuthHandler {
     void start();
     String getNickByLoginPass(String login, String pass);
-    void changeNick(String login, String newNick);
+    boolean changeNick(String login, String newNick);
     void stop();
 }
 //------------------------------------public class DBAuthHandler
@@ -20,6 +20,7 @@ import java.sql.*;
 public class DBAuthHandler implements AuthHandler{
     private static Connection connection;
     private static PreparedStatement psSelect;
+    private static PreparedStatement psSelectNick;
     private static PreparedStatement psUpdate;
 
 
@@ -32,6 +33,7 @@ public class DBAuthHandler implements AuthHandler{
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:chatusers.db");
             psSelect = connection.prepareStatement("SELECT * FROM users WHERE login = ? AND password = ?;");
+            psSelectNick = connection.prepareStatement("SELECT * FROM users WHERE nickname = ?;");
             psUpdate = connection.prepareStatement("UPDATE users SET nickname = ? WHERE login = ?;");
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,14 +56,21 @@ public class DBAuthHandler implements AuthHandler{
     }
 
     @Override
-    public void changeNick(String login, String newNick) {
+    public boolean changeNick(String login, String newNick) {
         try {
+            psSelectNick.setString(1, newNick);
+            ResultSet rs = psSelectNick.executeQuery();
+            if(rs.next()) {
+                return false;
+            }
+
             psUpdate.setString(1, newNick);
             psUpdate.setString(2, login);
             psUpdate.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     @Override
@@ -93,10 +102,11 @@ public class DBAuthHandler implements AuthHandler{
                             // * HomeWork here
                             String[] tokens = msg.split(" ");
                             if(tokens.length == 2) {
-                                server.getAuthHandler().changeNick(this.login, tokens[1]);
-                                server.broadcastMsg(this, "Пользователь " + this.nick + " сменил ник на " + tokens[1]);
-                                this.nick = tokens[1];
-                                server.broadcastClientsList();
+                                if(server.getAuthHandler().changeNick(this.login, tokens[1])) {
+                                    server.broadcastMsg(this, "Пользователь " + this.nick + " сменил ник на " + tokens[1] + ".");
+                                    this.nick = tokens[1];
+                                    server.broadcastClientsList();
+                                } else sendMessage("Ник уже используется.");
                             } else {
                                 sendMessage("Неправильный формат команды /changenick.");
                             }
